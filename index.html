@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Product Validation — Board Review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#10141B; --surface:#181D26; --surface-2:#1F2530; --border:#2A303C;
-    --text:#ECE8DF; --muted:#8B92A3;
-    --pass:#5FA88F; --fail:#C1583A; --amber:#D4A657;
-    --serif:'Fraunces',serif; --sans:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+    --bg:#FFFFFF; --text:#0A0A0A; --line:#E4E4DE;
+    --pass:#2E8B57; --pass-soft:rgba(46,139,87,.12);
+    --fail:#9C3B3B; --fail-soft:rgba(156,59,59,.12);
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; --mono:'IBM Plex Mono',monospace;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);
@@ -20,85 +20,90 @@
   html{scroll-padding-top:env(safe-area-inset-top,0px);}
   body{-webkit-font-smoothing:antialiased;}
 
-  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(16,20,27,.92);
-    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
-  .head-inner{max-width:1160px;margin:0 auto;padding:18px 24px;display:flex;align-items:baseline;
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(255,255,255,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .head-inner{max-width:1160px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;
     justify-content:space-between;flex-wrap:wrap;gap:10px;}
-  .brand{font-family:var(--serif);font-size:1.15rem;font-weight:500;letter-spacing:.01em;}
-  .brand span{color:var(--muted);font-family:var(--sans);font-size:.78rem;display:block;margin-top:2px;}
-  nav{display:flex;gap:4px;flex-wrap:wrap;}
-  nav button{background:none;border:1px solid transparent;color:var(--muted);font-family:var(--sans);
-    font-size:.85rem;padding:7px 13px;border-radius:7px;cursor:pointer;transition:.15s;}
-  nav button:hover{color:var(--text);}
-  nav button.active{background:var(--surface-2);border-color:var(--border);color:var(--text);}
+  .brand{font-size:1.02rem;font-weight:700;letter-spacing:-.01em;}
+  nav{position:relative;display:flex;gap:2px;flex-wrap:wrap;}
+  .nav-indicator{position:absolute;background:var(--text);border-radius:999px;z-index:0;pointer-events:none;
+    transition:left .32s cubic-bezier(.65,0,.35,1),top .32s cubic-bezier(.65,0,.35,1),
+      width .32s cubic-bezier(.65,0,.35,1),height .32s cubic-bezier(.65,0,.35,1);}
+  nav button{position:relative;z-index:1;background:none;border:none;color:var(--text);font-family:var(--sans);
+    font-weight:500;font-size:.85rem;padding:8px 15px;border-radius:999px;cursor:pointer;transition:color .2s;}
+  nav button.active{color:#fff;font-weight:600;}
   nav button .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;position:relative;top:-1px;}
 
-  main{max-width:1160px;margin:0 auto;padding:36px 24px 90px;}
+  main{max-width:1160px;margin:0 auto;padding:44px 24px 100px;}
   section.slide{display:none;}
   section.slide.active{display:block;animation:fade .35s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-  .eyebrow{font-size:.78rem;color:var(--muted);margin-bottom:8px;}
-  h1{font-family:var(--serif);font-weight:500;font-size:2.1rem;line-height:1.18;margin:0 0 10px;max-width:760px;}
-  h1 em{font-style:italic;color:var(--amber);}
-  .lede{color:var(--muted);max-width:620px;font-size:.98rem;line-height:1.6;margin-bottom:32px;}
+  h1{font-weight:700;font-size:2.3rem;letter-spacing:-.02em;line-height:1.14;margin:0 0 10px;max-width:780px;}
+  h1 em{font-style:normal;text-decoration:underline;text-decoration-color:var(--pass);
+    text-decoration-thickness:3px;text-underline-offset:5px;}
+  h1 .hl{font-style:normal;font-weight:700;}
+  h1 .hl.pass{color:var(--pass);} h1 .hl.fail{color:var(--fail);}
+  .lede{max-width:620px;font-size:.98rem;line-height:1.6;margin:0 0 36px;}
 
-  .grid{display:grid;gap:16px;}
-  .g-rank{grid-template-columns:1.35fr 1fr;}
+  .grid{display:grid;gap:32px;}
   .g5{grid-template-columns:repeat(5,1fr);}
-  .g2{grid-template-columns:1fr 1fr;}
   .g3{grid-template-columns:1.1fr .9fr .9fr;}
-  @media(max-width:860px){.g-rank,.g5,.g2,.g3{grid-template-columns:1fr;}}
+  .divided{gap:0;}
+  .divided>*{padding-left:28px;border-left:1px solid var(--line);}
+  .divided>*:first-child{padding-left:0;border-left:none;}
+  @media(max-width:860px){
+    .g5,.g3{grid-template-columns:1fr;}
+    .divided>*{padding-left:0;border-left:none;border-top:1px solid var(--line);padding-top:22px;margin-top:22px;}
+    .divided>*:first-child{border-top:none;padding-top:0;margin-top:0;}
+  }
 
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;}
-  .card h3{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--muted);margin:0 0 16px;}
+  h3{font-weight:700;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;margin:0 0 16px;}
 
-  .chip{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;padding:3px 10px 3px 8px;
-    border-radius:20px;font-family:var(--mono);}
-  .chip.pass{background:rgba(95,168,143,.14);color:var(--pass);}
-  .chip.fail{background:rgba(193,88,58,.14);color:var(--fail);}
-  .chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .pf{font-family:var(--mono);font-weight:700;font-size:.8rem;letter-spacing:.03em;}
+  .pf.pass{color:var(--pass);} .pf.fail{color:var(--fail);}
 
-  .rank-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border);}
+  .rank-list{display:flex;flex-direction:column;}
+  .rank-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rank-row:first-child{padding-top:0;}
   .rank-row:last-child{border-bottom:none;}
-  .rank-num{font-family:var(--serif);font-size:1.3rem;color:var(--muted);width:22px;}
-  .rank-name{font-weight:600;width:96px;}
-  .rank-bar-wrap{flex:1;height:9px;background:var(--surface-2);border-radius:5px;overflow:hidden;position:relative;}
+  .rank-name{font-weight:700;width:104px;}
+  .rank-bar-wrap{flex:1;height:10px;background:var(--line);border-radius:5px;overflow:hidden;position:relative;}
   .rank-bar{height:100%;border-radius:5px;}
-  .rank-val{font-family:var(--mono);font-size:.85rem;width:64px;text-align:right;}
-  .thresh-line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.55;}
+  .rank-val{font-family:var(--mono);font-weight:600;font-size:.9rem;width:60px;text-align:right;}
+  .thresh-line{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);opacity:.35;}
 
-  .metric-block{display:flex;flex-direction:column;gap:2px;}
-  .metric-val{font-family:var(--serif);font-size:1.9rem;font-weight:500;}
-  .metric-lbl{font-size:.72rem;color:var(--muted);}
+  .stat{display:flex;flex-direction:column;gap:6px;}
+  .stat-row{display:flex;gap:28px;margin-top:16px;}
+  .metric-val{font-size:1.9rem;font-weight:700;letter-spacing:-.01em;}
+  .metric-lbl{font-size:.76rem;}
 
   table.funnel{width:100%;border-collapse:collapse;font-size:.86rem;}
-  table.funnel th{text-align:left;font-weight:500;color:var(--muted);font-size:.72rem;padding:6px 0;border-bottom:1px solid var(--border);}
-  table.funnel td{padding:9px 0;border-bottom:1px solid var(--border);}
+  table.funnel th{text-align:left;font-weight:700;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;
+    padding:0 0 8px;border-bottom:1px solid var(--line);}
+  table.funnel td{padding:10px 0;border-bottom:1px solid var(--line);}
   table.funnel tr:last-child td{border-bottom:none;}
   .val{font-family:var(--mono);}
-  .bench{font-family:var(--mono);color:var(--muted);font-size:.78rem;}
+  .bench{font-family:var(--mono);font-size:.8rem;}
   .badge{display:inline-block;width:9px;height:9px;border-radius:50%;}
   .badge.good{background:var(--pass);} .badge.bad{background:var(--fail);}
 
-  .insight{background:var(--surface-2);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;
-    padding:16px 18px;font-size:.92rem;line-height:1.6;color:var(--text);}
-  .insight b{color:var(--amber);font-weight:600;}
+  .takeaway{max-width:760px;font-size:.98rem;line-height:1.65;margin-top:36px;padding-top:24px;border-top:1px solid var(--line);}
+  .takeaway b{font-weight:700;}
 
   .chart-wrap{position:relative;height:230px;}
-  .chart-wrap.tall{height:280px;}
 
-  footer{max-width:1160px;margin:0 auto;padding:0 24px 60px;color:var(--muted);font-size:.78rem;line-height:1.7;}
-  footer b{color:var(--text);}
+  footer{max-width:1160px;margin:0 auto;padding:0 24px 40px;font-size:.78rem;line-height:1.7;}
+  .fineprint{max-width:1160px;margin:0 auto;padding:0 24px 60px;font-size:.72rem;}
 
-  ::selection{background:var(--amber);color:#10141B;}
+  ::selection{background:var(--text);color:#fff;}
 </style>
 </head>
 <body>
 
 <header>
   <div class="head-inner">
-    <div class="brand">Product Validation Review<span>30-day demand test · Meta ads · Sep 2026</span></div>
+    <div class="brand">Product Validation Review</div>
     <nav id="nav"></nav>
   </div>
 </header>
@@ -110,16 +115,17 @@
   at 30%, plus leads that never reserved converting at 1% — against ad spend. COGS is modeled at 25% of AOV and
   shown as contribution-margin ROAS, a stricter true-profit read, alongside the assignment's revenue-based eROAS.
 </footer>
+<div class="fineprint">Design inspired by elevenlabs.io.</div>
 
 <script id="data" type="application/json">{"A": {"aov": 30, "rows": [[2.64, 110, 1, 2, 0], [5.96, 144, 17, 3, 0], [7.45, 208, 20, 7, 0], [17.89, 282, 20, 10, 1], [20.0, 312, 31, 11, 1], [20.01, 389, 38, 15, 2], [23.32, 544, 54, 17, 2], [23.52, 590, 73, 21, 2], [25.6, 625, 76, 23, 2], [27.23, 826, 84, 27, 3], [37.34, 972, 88, 29, 3], [37.46, 995, 89, 38, 3], [39.01, 1038, 96, 40, 3], [46.98, 1404, 97, 46, 3], [48.03, 1580, 105, 47, 3], [55.39, 1659, 128, 49, 4], [58.48, 1744, 147, 50, 4], [65.94, 1908, 169, 52, 4], [67.29, 1938, 172, 59, 4], [75.97, 2114, 191, 59, 5], [76.77, 2183, 197, 66, 5], [77.08, 2473, 197, 70, 5], [78.46, 2579, 209, 71, 6], [90.8, 2855, 209, 72, 7], [93.87, 2901, 217, 75, 7], [100.68, 2941, 220, 75, 8], [106.75, 2998, 224, 81, 8], [111.07, 3028, 233, 83, 8], [121.91, 3081, 240, 84, 9], [124.37, 3094, 267, 86, 9]], "metrics": {"spend": 1687.27, "impressions": 47515.0, "clicks": 3909.0, "leads": 1368.0, "res": 121.0, "aov": 30, "cpm": 35.5103, "ctr": 0.0823, "lcr": 0.35, "cpl": 1.2334, "rcr": 0.0885, "cpr": 13.9444, "u_pess": 31.04, "u_real": 49.98, "u_opt": 75.76, "erev_pess": 931.2, "erev_real": 1499.4, "erev_opt": 2272.8, "eroas_pess": 55.1897, "eroas_real": 88.8654, "eroas_opt": 134.7028, "cogs_unit": 7.5, "net_profit_real": -562.72, "contrib_margin_roas_real": 66.6491, "passfail": "FAIL"}}, "B": {"aov": 127, "rows": [[1.86, 26, 7, 1, 0], [4.58, 47, 29, 4, 0], [10.14, 431, 55, 5, 0], [15.45, 477, 60, 7, 0], [16.28, 520, 69, 11, 0], [19.59, 581, 73, 11, 0], [20.95, 824, 75, 12, 0], [25.45, 828, 82, 14, 1], [26.7, 1239, 86, 14, 1], [26.91, 1321, 100, 15, 1], [27.19, 1737, 113, 16, 1], [36.04, 1747, 121, 20, 1], [41.32, 1789, 152, 21, 1], [43.45, 2713, 155, 22, 1], [54.99, 2844, 169, 24, 1], [57.53, 3107, 175, 27, 1], [60.19, 3243, 178, 27, 1], [66.38, 3289, 194, 27, 1], [71.04, 3381, 199, 29, 1], [71.17, 3399, 200, 33, 2], [72.48, 3719, 201, 33, 2], [75.51, 3995, 202, 34, 2], [76.12, 4187, 213, 35, 2], [77.62, 4495, 219, 36, 2], [81.81, 4544, 222, 36, 2], [85.57, 4596, 230, 36, 2], [93.84, 4596, 245, 37, 2], [102.04, 4603, 261, 37, 2], [105.24, 4613, 275, 37, 2], [110.73, 4737, 299, 38, 2]], "metrics": {"spend": 1578.17, "impressions": 77628.0, "clicks": 4659.0, "leads": 699.0, "res": 34.0, "aov": 127, "cpm": 20.3299, "ctr": 0.06, "lcr": 0.15, "cpl": 2.2578, "rcr": 0.0486, "cpr": 46.4168, "u_pess": 10.295, "u_real": 17.19, "u_opt": 27.58, "erev_pess": 1307.465, "erev_real": 2183.13, "erev_opt": 3502.66, "eroas_pess": 82.8469, "eroas_real": 138.333, "eroas_opt": 221.9444, "cogs_unit": 31.75, "net_profit_real": 59.1775, "contrib_margin_roas_real": 103.7498, "passfail": "FAIL"}}, "C": {"aov": 289, "rows": [[4.7, 88, 1, 1, 0], [8.03, 150, 3, 2, 0], [16.8, 187, 11, 4, 0], [19.44, 430, 13, 4, 0], [28.66, 500, 13, 4, 0], [29.03, 823, 21, 4, 0], [31.98, 909, 23, 4, 0], [36.51, 1252, 34, 5, 0], [46.96, 1267, 35, 5, 0], [47.08, 1380, 35, 5, 0], [47.91, 1391, 39, 7, 0], [55.39, 1498, 40, 7, 1], [60.3, 1559, 43, 9, 1], [60.37, 1847, 51, 10, 1], [64.07, 1976, 51, 11, 1], [64.83, 2040, 54, 13, 1], [65.02, 2557, 55, 13, 1], [70.74, 2696, 58, 14, 1], [71.88, 2703, 60, 14, 1], [72.13, 2788, 61, 14, 1], [74.98, 2801, 61, 17, 1], [84.08, 2826, 66, 17, 1], [84.98, 2876, 66, 18, 1], [91.98, 2880, 69, 18, 1], [93.1, 3102, 74, 22, 1], [94.11, 3142, 76, 24, 1], [98.13, 3226, 84, 25, 2], [98.19, 3283, 86, 26, 2], [100.67, 3315, 89, 26, 2], [101.89, 3325, 94, 27, 2]], "metrics": {"spend": 1823.94, "impressions": 58817.0, "clicks": 1466.0, "leads": 370.0, "res": 23.0, "aov": 289, "cpm": 31.0104, "ctr": 0.0249, "lcr": 0.2524, "cpl": 4.9296, "rcr": 0.0622, "cpr": 79.3017, "u_pess": 6.45, "u_real": 10.6, "u_opt": 16.6, "erev_pess": 1864.05, "erev_real": 3063.4, "erev_opt": 4797.4, "eroas_pess": 102.1991, "eroas_real": 167.9551, "eroas_opt": 263.024, "cogs_unit": 72.25, "net_profit_real": 473.61, "contrib_margin_roas_real": 125.9663, "passfail": "FAIL"}}, "D": {"aov": 1200, "rows": [[2.27, 292, 7, 1, 0], [9.84, 371, 9, 3, 0], [12.13, 408, 17, 3, 0], [13.56, 557, 18, 3, 0], [14.44, 585, 19, 3, 0], [23.93, 622, 22, 4, 0], [27.45, 631, 35, 4, 0], [30.48, 679, 37, 5, 0], [32.12, 681, 42, 7, 0], [36.46, 864, 47, 7, 0], [37.07, 896, 47, 7, 1], [41.1, 939, 49, 7, 1], [42.71, 1020, 50, 8, 1], [48.86, 1038, 59, 8, 1], [50.64, 1297, 61, 9, 1], [56.42, 1449, 68, 9, 1], [57.92, 1495, 69, 10, 1], [60.23, 1910, 73, 10, 1], [60.29, 2028, 77, 11, 1], [60.8, 2082, 84, 12, 1], [64.61, 2206, 86, 13, 1], [66.43, 2435, 88, 14, 1], [67.19, 2802, 98, 14, 1], [73.11, 2976, 105, 15, 1], [76.87, 3152, 110, 15, 1], [80.75, 3266, 117, 15, 1], [84.38, 3385, 120, 16, 1], [89.33, 3531, 134, 16, 1], [100.8, 3578, 139, 16, 1], [101.33, 3593, 143, 17, 1]], "metrics": {"spend": 1523.52, "impressions": 50768.0, "clicks": 2030.0, "leads": 282.0, "res": 20.0, "aov": 1200, "cpm": 30.0095, "ctr": 0.04, "lcr": 0.1389, "cpl": 5.4026, "rcr": 0.0709, "cpr": 76.176, "u_pess": 5.41, "u_real": 8.82, "u_opt": 13.64, "erev_pess": 6492.0, "erev_real": 10584.0, "erev_opt": 16368.0, "eroas_pess": 426.1185, "eroas_real": 694.707, "eroas_opt": 1074.3541, "cogs_unit": 300.0, "net_profit_real": 6414.48, "contrib_margin_roas_real": 521.0302, "passfail": "PASS"}}, "E": {"aov": 97, "rows": [[2.15, 28, 6, 2, 0], [13.47, 330, 17, 3, 0], [18.15, 751, 30, 4, 2], [18.25, 849, 31, 4, 2], [21.61, 1063, 40, 13, 2], [29.96, 1353, 69, 15, 3], [41.13, 2009, 72, 16, 3], [47.7, 2020, 83, 24, 3], [50.47, 2087, 84, 27, 3], [53.64, 2090, 88, 31, 3], [54.97, 2183, 95, 34, 4], [60.19, 2399, 97, 35, 4], [64.58, 2404, 186, 36, 5], [67.24, 2524, 192, 37, 5], [68.57, 2725, 204, 41, 5], [69.42, 2726, 210, 45, 5], [69.75, 3003, 219, 57, 5], [72.19, 3126, 233, 61, 6], [72.75, 3238, 243, 63, 6], [82.57, 3498, 259, 99, 7], [82.89, 3562, 262, 100, 7], [84.15, 3809, 276, 101, 7], [87.63, 4443, 308, 102, 7], [103.77, 4837, 348, 103, 9], [108.09, 5054, 360, 110, 9], [109.76, 5241, 400, 110, 9], [110.13, 5512, 416, 122, 10], [110.91, 5542, 439, 127, 10], [111.18, 5548, 446, 131, 10], [112.71, 5934, 462, 137, 11]], "metrics": {"spend": 1999.98, "impressions": 89888.0, "clicks": 6175.0, "leads": 1790.0, "res": 162.0, "aov": 97, "cpm": 22.2497, "ctr": 0.0687, "lcr": 0.2899, "cpl": 1.1173, "rcr": 0.0905, "cpr": 12.3456, "u_pess": 41.35, "u_real": 66.5, "u_opt": 100.6, "erev_pess": 4010.95, "erev_real": 6450.5, "erev_opt": 9758.2, "eroas_pess": 200.5495, "eroas_real": 322.5282, "eroas_opt": 487.9149, "cogs_unit": 24.25, "net_profit_real": 2837.895, "contrib_margin_roas_real": 241.8962, "passfail": "PASS"}}}</script>
 <script>
 const DATA = JSON.parse(document.getElementById('data').textContent);
 const order = ['OVERVIEW','A','B','C','D','E'];
 const names = {OVERVIEW:'Overview', A:'Product A', B:'Product B', C:'Product C', D:'Product D', E:'Product E'};
-const colors = {A:'#C1583A', B:'#C1583A', C:'#C1583A', D:'#5FA88F', E:'#5FA88F'}; // fail/pass tint per product
 const fmt = (n,d=0)=> Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const money = (n)=> '$'+fmt(n,0);
 const pct = (n,d=1)=> fmt(n*100,d)+'%';
+const charts = {};
 
 const insights = {
   A: `<b>Funnel's fine, price isn't.</b> Every stage beats benchmark — CTR ${pct(DATA.A.metrics.ctr)}, L-CR ${pct(DATA.A.metrics.lcr,0)}, R-CR ${pct(DATA.A.metrics.rcr,1)} — yet realistic eROAS lands at ${pct(DATA.A.metrics.eroas_real/100,0)}. At a $30 AOV there isn't enough revenue per conversion to outrun ${money(DATA.A.metrics.cpr)} cost-per-reservation. Fixing creative or targeting won't move this — raising AOV (bundle, upsell, tier up) will.`,
@@ -131,19 +137,37 @@ const insights = {
 
 // ---------- nav + shell ----------
 const navEl = document.getElementById('nav');
+const indicator = document.createElement('div');
+indicator.className = 'nav-indicator';
+navEl.appendChild(indicator);
 order.forEach(k=>{
   const b = document.createElement('button');
   b.dataset.k = k;
-  const dotColor = k==='OVERVIEW' ? 'var(--amber)' : (DATA[k].metrics.passfail==='PASS' ? 'var(--pass)' : 'var(--fail)');
+  const dotColor = DATA[k] ? (DATA[k].metrics.passfail==='PASS' ? 'var(--pass)' : 'var(--fail)') : null;
   b.innerHTML = (k==='OVERVIEW' ? '' : `<span class="dot" style="background:${dotColor}"></span>`) + names[k];
   b.onclick = ()=> show(k);
   navEl.appendChild(b);
 });
 
-function show(k){
-  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.k===k));
-  document.querySelectorAll('section.slide').forEach(s=>s.classList.toggle('active', s.id==='s-'+k));
+function moveIndicator(btn){
+  indicator.style.left = btn.offsetLeft+'px';
+  indicator.style.top = btn.offsetTop+'px';
+  indicator.style.width = btn.offsetWidth+'px';
+  indicator.style.height = btn.offsetHeight+'px';
 }
+
+function show(k){
+  const btns = [...document.querySelectorAll('nav button')];
+  btns.forEach(b=>b.classList.toggle('active', b.dataset.k===k));
+  document.querySelectorAll('section.slide').forEach(s=>s.classList.toggle('active', s.id==='s-'+k));
+  const activeBtn = btns.find(b=>b.dataset.k===k);
+  if(activeBtn) moveIndicator(activeBtn);
+  if(charts[k]) requestAnimationFrame(()=>charts[k].resize());
+}
+window.addEventListener('resize', ()=>{
+  const activeBtn = document.querySelector('nav button.active');
+  if(activeBtn) moveIndicator(activeBtn);
+});
 
 // ---------- build overview ----------
 const main = document.getElementById('main');
@@ -156,13 +180,12 @@ function overviewHTML(){
     const pf = DATA[r.k].metrics.passfail;
     const w = (r.v/maxV*100).toFixed(1);
     return `<div class="rank-row">
-      <div class="rank-num">${names[r.k].slice(-1)}</div>
       <div class="rank-name">Product ${r.k}</div>
       <div class="rank-bar-wrap">
         <div class="rank-bar" style="width:${w}%;background:${pf==='PASS'?'var(--pass)':'var(--fail)'}"></div>
         <div class="thresh-line" style="left:${threshPct}%"></div>
       </div>
-      <div class="rank-val">${pct(r.v/100,0)}</div>
+      <div class="rank-val" style="color:${pf==='PASS'?'var(--pass)':'var(--fail)'}">${pct(r.v/100,0)}</div>
     </div>`;
   }).join('');
 
@@ -170,45 +193,19 @@ function overviewHTML(){
 
   return `
   <section class="slide" id="s-OVERVIEW">
-    <div class="eyebrow">Board review · which products earn back the ad dollar</div>
-    <h1>Two of five products clear the <em>200% eROAS</em> bar.</h1>
-    <p class="lede">30 days of Meta demand-testing across five products, same validation bar: does a realistic
-    estimate of revenue return at least 2x the ad spend that produced it? Bar marks the pass line.</p>
-    <div class="grid g-rank">
-      <div class="card">
-        <h3>Realistic eROAS by product</h3>
-        ${rows}
-      </div>
-      <div class="card">
-        <h3>Verdict</h3>
-        <div class="metric-block" style="margin-bottom:18px;">
-          <div class="metric-val">${passCount} of 5</div>
-          <div class="metric-lbl">products pass at realistic-case eROAS</div>
-        </div>
-        <table class="funnel">
-          <tr><td>D — $1,200 AOV</td><td><span class="chip pass"><span class="dot"></span>PASS</span></td></tr>
-          <tr><td>E — $97 AOV</td><td><span class="chip pass"><span class="dot"></span>PASS</span></td></tr>
-          <tr><td>C — $289 AOV</td><td><span class="chip fail"><span class="dot"></span>FAIL — close</span></td></tr>
-          <tr><td>B — $127 AOV</td><td><span class="chip fail"><span class="dot"></span>FAIL</span></td></tr>
-          <tr><td>A — $30 AOV</td><td><span class="chip fail"><span class="dot"></span>FAIL</span></td></tr>
-        </table>
-      </div>
-    </div>
-    <div class="grid g5" style="margin-top:16px;">
+    <h1>${passCount} of 5 products clear <em>200% eROAS</em>.</h1>
+    <div class="rank-list" style="margin-top:8px;">${rows}</div>
+    <div class="grid g5 divided" style="margin-top:44px;">
       ${order.slice(1).map(k=>`
-        <div class="card" style="padding:16px;">
-          <h3 style="margin-bottom:10px;">Product ${k}</h3>
-          <div class="metric-val" style="font-size:1.3rem;">${money(DATA[k].aov)}</div>
-          <div class="metric-lbl" style="margin-bottom:10px;">AOV</div>
-          <div class="chip ${DATA[k].metrics.passfail==='PASS'?'pass':'fail'}"><span class="dot"></span>${DATA[k].metrics.passfail}</div>
+        <div class="stat">
+          <div class="metric-val" style="font-size:1.4rem;">${money(DATA[k].aov)}</div>
+          <div class="metric-lbl">Product ${k} AOV</div>
+          <div class="pf ${DATA[k].metrics.passfail==='PASS'?'pass':'fail'}">${DATA[k].metrics.passfail}</div>
         </div>`).join('')}
     </div>
-    <div class="insight" style="margin-top:16px;">
-      <b>Where to put money next.</b> Fund D and E — both clear the bar with room to spare and D's weak lead
-      conversion means there's still upside left on the table. C is worth one more test: it fails on volume,
-      not on economics, and a creative pass could flip it. A and B need a different kind of fix before more
-      spend — A's price point, B's landing/offer experience — not more media budget against the current setup.
-    </div>
+    <p class="takeaway"><b>Fund D and E.</b> Both clear the bar with room to spare. C fails on volume, not
+    economics — one more creative test could flip it. A and B need a different fix before more spend:
+    A's price point, B's landing/offer experience.</p>
   </section>`;
 }
 
@@ -223,52 +220,52 @@ function productHTML(k){
     <tr>
       <td>${label}</td>
       <td class="val">${extra}</td>
-      <td class="bench">bench ${bench}</td>
+      <td class="bench">${bench}</td>
       <td><span class="badge ${good?'good':'bad'}"></span></td>
     </tr>`;
 
   return `
   <section class="slide" id="s-${k}">
-    <div class="eyebrow">Product ${k} · $${fmt(DATA[k].aov)} AOV</div>
-    <h1>Product ${k} — <em>${m.passfail}</em> at realistic eROAS of ${pct(m.eroas_real/100,0)}</h1>
-    <p class="lede">${money(m.spend)} spent across 30 days, ${fmt(m.impressions)} impressions, ${fmt(m.res)} reservations.</p>
+    <h1>Product ${k} — <span class="hl ${m.passfail==='PASS'?'pass':'fail'}">${m.passfail}</span> at ${pct(m.eroas_real/100,0)} eROAS</h1>
+    <p class="lede">${money(DATA[k].aov)} AOV · ${money(m.spend)} spent · ${fmt(m.res)} reservations</p>
 
-    <div class="grid g3">
-      <div class="card">
+    <div class="grid g3 divided">
+      <div>
         <h3>Funnel vs. benchmark</h3>
         <table class="funnel">
-          <tr><th>Stage</th><th>Rate</th><th></th><th></th></tr>
+          <tr><th>Stage</th><th>Rate</th><th>Benchmark</th><th></th></tr>
           ${benchRow('CTR', m.ctr, '>3%', m.ctr>0.03, pct(m.ctr))}
           ${benchRow('Lead-CR', m.lcr, '>20%', m.lcr>0.20, pct(m.lcr,0))}
           ${benchRow('Res-CR', m.rcr, '>5%', m.rcr>0.05, pct(m.rcr,1))}
         </table>
-        <div style="margin-top:14px;display:flex;gap:22px;">
-          <div class="metric-block"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpl)}</div><div class="metric-lbl">cost / lead</div></div>
-          <div class="metric-block"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpr)}</div><div class="metric-lbl">cost / reservation</div></div>
-          <div class="metric-block"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpm)}</div><div class="metric-lbl">CPM</div></div>
+        <div class="stat-row">
+          <div class="stat"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpl)}</div><div class="metric-lbl">cost / lead</div></div>
+          <div class="stat"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpr)}</div><div class="metric-lbl">cost / reservation</div></div>
+          <div class="stat"><div class="metric-val" style="font-size:1.3rem;">${money(m.cpm)}</div><div class="metric-lbl">CPM</div></div>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Spend vs. reservations, 30 days</h3>
+      <div>
+        <h3>Spend vs. reservations</h3>
         <div class="chart-wrap"><canvas id="chart-${k}"></canvas></div>
       </div>
 
-      <div class="card">
-        <h3>Estimated ROAS scenarios</h3>
+      <div>
+        <h3>ROAS scenarios</h3>
         <table class="funnel">
           <tr><td>Pessimistic</td><td class="val">${pct(m.eroas_pess/100,0)}</td></tr>
           <tr><td><b>Realistic</b></td><td class="val"><b>${pct(m.eroas_real/100,0)}</b></td></tr>
           <tr><td>Optimistic</td><td class="val">${pct(m.eroas_opt/100,0)}</td></tr>
-          <tr><td>Contribution-margin ROAS</td><td class="val">${pct(m.contrib_margin_roas_real/100,0)}</td></tr>
+          <tr><td>Contribution margin</td><td class="val">${pct(m.contrib_margin_roas_real/100,0)}</td></tr>
         </table>
-        <div style="margin-top:12px;">
-          <div class="metric-block"><div class="metric-val" style="font-size:1.3rem;color:${m.net_profit_real>=0?'var(--pass)':'var(--fail)'}">${m.net_profit_real>=0?'+':'-'}${money(Math.abs(m.net_profit_real))}</div><div class="metric-lbl">net profit at realistic case, after COGS</div></div>
+        <div class="stat" style="margin-top:16px;">
+          <div class="metric-val" style="font-size:1.3rem;color:${m.net_profit_real>=0?'var(--pass)':'var(--fail)'}">${m.net_profit_real>=0?'+':'-'}${money(Math.abs(m.net_profit_real))}</div>
+          <div class="metric-lbl">net profit, after COGS</div>
         </div>
       </div>
     </div>
 
-    <div class="insight" style="margin-top:16px;">${insights[k]}</div>
+    <p class="takeaway">${insights[k]}</p>
   </section>`;
 }
 
@@ -276,20 +273,20 @@ main.innerHTML = overviewHTML() + order.slice(1).map(productHTML).join('');
 show('OVERVIEW');
 
 // ---------- charts ----------
-Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
-Chart.defaults.color = '#8B92A3';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#0A0A0A';
 order.slice(1).forEach(k=>{
   const rows = DATA[k].rows;
   const days = rows.map((_,i)=>i+1);
   let s=0; const cumRes = rows.map(r=>{s+=r[4]; return s;});
   let s2=0; const cumSpend = rows.map(r=>{s2+=r[0]; return Math.round(s2);});
   const ctx = document.getElementById('chart-'+k);
-  new Chart(ctx, {
+  charts[k] = new Chart(ctx, {
     data:{
       labels:days,
       datasets:[
-        {type:'bar', label:'Cumulative spend', data:cumSpend, backgroundColor:'rgba(212,166,87,.28)', borderRadius:2, yAxisID:'y', order:2},
-        {type:'line', label:'Cumulative reservations', data:cumRes, borderColor: DATA[k].metrics.passfail==='PASS'?'#5FA88F':'#C1583A',
+        {type:'bar', label:'Cumulative spend', data:cumSpend, backgroundColor:'rgba(14,14,13,.09)', borderRadius:2, yAxisID:'y', order:2},
+        {type:'line', label:'Cumulative reservations', data:cumRes, borderColor: DATA[k].metrics.passfail==='PASS'?'#2E8B57':'#9C3B3B',
          backgroundColor:'transparent', borderWidth:2.4, pointRadius:0, tension:.3, yAxisID:'y1', order:1}
       ]
     },
@@ -299,7 +296,7 @@ order.slice(1).forEach(k=>{
       plugins:{legend:{display:true, position:'bottom', labels:{boxWidth:10, font:{size:10.5}}}},
       scales:{
         x:{grid:{display:false}, ticks:{maxTicksLimit:6, font:{size:10}}},
-        y:{position:'left', grid:{color:'#2A303C'}, ticks:{font:{size:10}, callback:v=>'$'+v}},
+        y:{position:'left', grid:{color:'#E4E4DE'}, ticks:{font:{size:10}, callback:v=>'$'+v}},
         y1:{position:'right', grid:{display:false}, ticks:{font:{size:10}}}
       }
     }
