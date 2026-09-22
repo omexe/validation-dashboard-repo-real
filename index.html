@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Product Validation — Board Review</title>
+<title>Product Validation: Board Review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#FFFFFF; --text:#0A0A0A; --line:#E4E4DE;
@@ -111,8 +111,8 @@
 <main id="main"></main>
 
 <footer>
-  Pass bar: <b>realistic eROAS &ge; 200%</b>. Realistic eROAS blends two purchase paths — reservations converting
-  at 30%, plus leads that never reserved converting at 1% — against ad spend. COGS is modeled at 25% of AOV and
+  Pass bar: <b>realistic eROAS &ge; 200%</b>. Realistic eROAS blends two purchase paths against ad spend:
+  reservations converting at 30%, plus leads that never reserved converting at 1%. COGS is modeled at 25% of AOV and
   shown as contribution-margin ROAS, a stricter true-profit read, alongside the assignment's revenue-based eROAS.
 </footer>
 <div class="fineprint">Design inspired by elevenlabs.io.</div>
@@ -128,11 +128,11 @@ const pct = (n,d=1)=> fmt(n*100,d)+'%';
 const charts = {};
 
 const insights = {
-  A: `<b>Funnel's fine, price isn't.</b> Every stage beats benchmark — CTR ${pct(DATA.A.metrics.ctr)}, L-CR ${pct(DATA.A.metrics.lcr,0)}, R-CR ${pct(DATA.A.metrics.rcr,1)} — yet realistic eROAS lands at ${pct(DATA.A.metrics.eroas_real/100,0)}. At a $30 AOV there isn't enough revenue per conversion to outrun ${money(DATA.A.metrics.cpr)} cost-per-reservation. Fixing creative or targeting won't move this — raising AOV (bundle, upsell, tier up) will.`,
-  B: `<b>Leaking mid-funnel, twice.</b> CTR is healthy at ${pct(DATA.B.metrics.ctr)}, but L-CR (${pct(DATA.B.metrics.lcr,0)}) and R-CR (${pct(DATA.B.metrics.rcr,1)}) both sit under benchmark. People click, then stall — the ad's promise isn't surviving contact with the landing page or offer. Before spending more, fix the page between click and lead, and the step between lead and reservation.`,
-  C: `<b>Closest fail on the board.</b> Once someone clicks, this converts well — L-CR ${pct(DATA.C.metrics.lcr,0)} and R-CR ${pct(DATA.C.metrics.rcr,1)} both clear benchmark. The leak is upstream: CTR of ${pct(DATA.C.metrics.ctr)} is under the 3% bar, starving a genuinely good offer of volume. A creative/targeting pass to lift CTR alone could carry this from ${pct(DATA.C.metrics.eroas_real/100,0)} to a pass.`,
-  D: `<b>The board's clear pick.</b> L-CR is the weakest stage here (${pct(DATA.D.metrics.lcr,0)}, under benchmark) — but a $1,200 AOV makes the unit economics almost unbeatable regardless: ${pct(DATA.D.metrics.eroas_real/100,0)} realistic eROAS, ${money(DATA.D.metrics.net_profit_real)} net profit on ${money(DATA.D.metrics.spend)} spent. Fixing L-CR is upside, not a requirement — this is the one to fund first.`,
-  E: `<b>Highest volume, nothing to fix.</b> Every stage clears benchmark, and this pulled the most leads (${fmt(DATA.E.metrics.leads)}) and reservations (${fmt(DATA.E.metrics.res)}) of any product. ${pct(DATA.E.metrics.eroas_real/100,0)} realistic eROAS on the highest spend tested (${money(DATA.E.metrics.spend)}) says this scales cleanly — the best candidate for more budget with the least risk.`,
+  A: `<b>Funnel's fine, price isn't.</b> Every stage beats benchmark: CTR ${pct(DATA.A.metrics.ctr)}, L-CR ${pct(DATA.A.metrics.lcr,0)}, R-CR ${pct(DATA.A.metrics.rcr,1)}. Yet realistic eROAS lands at ${pct(DATA.A.metrics.eroas_real/100,0)}. At a $30 AOV there isn't enough revenue per conversion to outrun ${money(DATA.A.metrics.cpr)} cost-per-reservation. Fixing creative or targeting won't move this; raising AOV (bundle, upsell, tier up) will.`,
+  B: `<b>Leaking mid-funnel, twice.</b> CTR is healthy at ${pct(DATA.B.metrics.ctr)}, but L-CR (${pct(DATA.B.metrics.lcr,0)}) and R-CR (${pct(DATA.B.metrics.rcr,1)}) both sit under benchmark. People click, then stall: the ad's promise isn't surviving contact with the landing page or offer. Before spending more, fix the page between click and lead, and the step between lead and reservation.`,
+  C: `<b>Closest fail on the board.</b> Once someone clicks, this converts well: L-CR ${pct(DATA.C.metrics.lcr,0)} and R-CR ${pct(DATA.C.metrics.rcr,1)} both clear benchmark. The leak is upstream: CTR of ${pct(DATA.C.metrics.ctr)} is under the 3% bar, starving a genuinely good offer of volume. A creative/targeting pass to lift CTR alone could carry this from ${pct(DATA.C.metrics.eroas_real/100,0)} to a pass.`,
+  D: `<b>The board's clear pick.</b> L-CR is the weakest stage here (${pct(DATA.D.metrics.lcr,0)}, under benchmark), but a $1,200 AOV makes the unit economics almost unbeatable regardless: ${pct(DATA.D.metrics.eroas_real/100,0)} realistic eROAS, ${money(DATA.D.metrics.net_profit_real)} net profit on ${money(DATA.D.metrics.spend)} spent. Fixing L-CR is upside, not a requirement. This is the one to fund first.`,
+  E: `<b>Highest volume, nothing to fix.</b> Every stage clears benchmark, and this pulled the most leads (${fmt(DATA.E.metrics.leads)}) and reservations (${fmt(DATA.E.metrics.res)}) of any product. ${pct(DATA.E.metrics.eroas_real/100,0)} realistic eROAS on the highest spend tested (${money(DATA.E.metrics.spend)}) says this scales cleanly: the best candidate for more budget with the least risk.`,
 };
 
 // ---------- nav + shell ----------
@@ -204,7 +204,7 @@ function overviewHTML(){
         </div>`).join('')}
     </div>
     <p class="takeaway"><b>Fund D and E.</b> Both clear the bar with room to spare. C fails on volume, not
-    economics — one more creative test could flip it. A and B need a different fix before more spend:
+    economics; one more creative test could flip it. A and B need a different fix before more spend:
     A's price point, B's landing/offer experience.</p>
   </section>`;
 }
@@ -226,7 +226,7 @@ function productHTML(k){
 
   return `
   <section class="slide" id="s-${k}">
-    <h1>Product ${k} — <span class="hl ${m.passfail==='PASS'?'pass':'fail'}">${m.passfail}</span> at ${pct(m.eroas_real/100,0)} eROAS</h1>
+    <h1>Product ${k}: <span class="hl ${m.passfail==='PASS'?'pass':'fail'}">${m.passfail}</span> at ${pct(m.eroas_real/100,0)} eROAS</h1>
     <p class="lede">${money(DATA[k].aov)} AOV · ${money(m.spend)} spent · ${fmt(m.res)} reservations</p>
 
     <div class="grid g3 divided">
